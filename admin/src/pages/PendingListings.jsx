@@ -120,12 +120,14 @@ RejectModal.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
 };
-
+  
 // ── Listing Card ──────────────────────────────────────────────────────────────
-
 const ListingCard = ({ listing, onApprove, onReject, actionLoading }) => {
-  const [imgExpanded, setImgExpanded] = useState(false);
-  const cover = listing.image?.[0] ?? null;
+
+  const images = listing.image || [];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+
   const submitter = listing.postedBy;
 
   return (
@@ -134,167 +136,147 @@ const ListingCard = ({ listing, onApprove, onReject, actionLoading }) => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ duration: 0.25 }}
       className="bg-white border border-[#E6D5C3] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="flex flex-col sm:flex-row">
-        {/* Thumbnail */}
-        <button
-          type="button"
-          onClick={() => setImgExpanded((v) => !v)}
-          className="sm:w-52 sm:flex-shrink-0 h-44 sm:h-auto bg-[#F5F1E8] relative group cursor-zoom-in"
-          aria-label="Expand image"
-        >
-          {cover ? (
-            <img
-              src={cover}
-              alt={listing.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Building2 className="w-10 h-10 text-[#E6D5C3]" />
-            </div>
-          )}
-          {listing.image?.length > 1 && (
-            <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-md font-medium">
-              +{listing.image.length - 1} more
-            </span>
-          )}
-        </button>
 
-        {/* Content */}
+        {/* 🔥 IMAGE SECTION */}
+        <div className="sm:w-60 flex-shrink-0 bg-[#F5F1E8] p-2">
+
+          {/* Main Image */}
+          <div className="relative">
+            <img
+              src={images[currentIndex]}
+              className="w-full h-40 object-cover rounded-xl cursor-pointer"
+              onClick={() => setShowModal(true)}
+            />
+
+            {/* Arrows */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={() =>
+                    setCurrentIndex((prev) =>
+                      prev === 0 ? images.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-2 py-1 rounded"
+                >
+                  ‹
+                </button>
+
+                <button
+                  onClick={() =>
+                    setCurrentIndex((prev) => (prev + 1) % images.length)
+                  }
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white px-2 py-1 rounded"
+                >
+                  ›
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Thumbnails */}
+          <div className="grid grid-cols-4 gap-2 mt-2">
+            {images.slice(0, 4).map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                onClick={() => setCurrentIndex(i)}
+                className={`h-16 w-full object-cover rounded-lg cursor-pointer border ${
+                  i === currentIndex ? "border-[#C9A96E]" : ""
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 🔥 CONTENT (same as before) */}
         <div className="flex-1 p-5 flex flex-col gap-3">
-          {/* Title + type */}
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <h3 className="font-semibold text-[#221410] text-base leading-snug flex-1">
+
+          <div className="flex justify-between">
+            <h3 className="font-semibold text-[#221410]">
               {listing.title}
             </h3>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <span className="bg-[#F3EDE8] text-[#C9A96E] text-xs font-semibold px-2.5 py-1 rounded-full">
-                {listing.type}
-              </span>
-              <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold px-2.5 py-1 rounded-full">
-                Under Review
-              </span>
-            </div>
           </div>
 
-          {/* Location */}
-          <p className="text-sm text-[#6B7280] flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-[#C9A96E]" />
-            <span className="line-clamp-1">{listing.location}</span>
+          <p className="text-sm text-[#6B7280] flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5 text-[#C9A96E]" />
+            {listing.location}
           </p>
 
-          {/* Stats row */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-[#374151]">
-            <span className="font-semibold text-[#C9A96E] text-base">{formatPrice(listing.price)}</span>
-            <span className="flex items-center gap-1 text-xs text-[#6B7280]">
-              <BedDouble className="w-3.5 h-3.5" /> {listing.beds} bed
+          <div className="flex gap-4 text-sm">
+            <span className="text-[#C9A96E] font-bold">
+              {formatPrice(listing.price)}
             </span>
-            <span className="flex items-center gap-1 text-xs text-[#6B7280]">
-              <Bath className="w-3.5 h-3.5" /> {listing.baths} bath
-            </span>
-            <span className="flex items-center gap-1 text-xs text-[#6B7280]">
-              <Maximize className="w-3.5 h-3.5" /> {listing.sqft?.toLocaleString()} sqft
-            </span>
-            <span className="text-xs text-[#9CA3AF] bg-[#F3F4F6] px-2 py-0.5 rounded-full">
-              {listing.availability}
-            </span>
+            <span>{listing.beds} bed</span>
+            <span>{listing.baths} bath</span>
+            <span>{listing.sqft} sqft</span>
           </div>
 
-          {/* Description excerpt */}
-          {listing.description && (
-            <p className="text-xs text-[#6B7280] line-clamp-2 leading-relaxed">
-              {listing.description}
-            </p>
-          )}
-
-          {/* Submitted by */}
-          <div className="flex flex-wrap gap-3 items-center py-2 border-t border-[#F3EDE8]">
-            <div className="flex items-center gap-1.5 text-xs text-[#374151]">
-              <User className="w-3.5 h-3.5 text-[#9CA3AF]" />
-              <span className="font-medium">{submitter?.name ?? "Unknown User"}</span>
-            </div>
-            {submitter?.email && (
-              <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                <Mail className="w-3.5 h-3.5 text-[#9CA3AF]" />
-                <span>{submitter.email}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 text-xs text-[#9CA3AF] ml-auto">
-              <Clock className="w-3.5 h-3.5" />
-              <span>Submitted {formatDate(listing.createdAt)}</span>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-3 pt-1">
+          {/* Buttons */}
+          <div className="flex gap-3 mt-auto">
             <button
               onClick={() => onApprove(listing._id)}
-              disabled={!!actionLoading}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors",
-                actionLoading === `approve-${listing._id}` && "opacity-70 cursor-not-allowed"
-              )}
+              className="flex-1 bg-green-600 text-white py-2 rounded-lg"
             >
-              {actionLoading === `approve-${listing._id}` ? (
-                <motion.span
-                  className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.75, ease: "linear" }}
-                />
-              ) : (
-                <Check className="w-4 h-4" />
-              )}
               Approve
             </button>
             <button
               onClick={() => onReject(listing)}
-              disabled={!!actionLoading}
-              className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors",
-                actionLoading === `reject-${listing._id}` && "opacity-70 cursor-not-allowed"
-              )}
+              className="flex-1 bg-red-600 text-white py-2 rounded-lg"
             >
-              {actionLoading === `reject-${listing._id}` ? (
-                <motion.span
-                  className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 0.75, ease: "linear" }}
-                />
-              ) : (
-                <X className="w-4 h-4" />
-              )}
               Reject
             </button>
           </div>
         </div>
       </div>
 
-      {/* Expanded image strip */}
-      <AnimatePresence>
-        {imgExpanded && listing.image?.length > 1 && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="border-t border-[#F5F1E8] overflow-hidden"
+      {/* 🔥 FULLSCREEN MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+
+          {/* Close */}
+          <button
+            onClick={() => setShowModal(false)}
+            className="absolute top-5 right-5 text-white text-3xl"
           >
-            <div className="flex gap-2 p-3 overflow-x-auto">
-              {listing.image.map((src, idx) => (
-                <img
-                  key={idx}
-                  src={src}
-                  alt={`Image ${idx + 1}`}
-                  className="h-24 w-36 object-cover rounded-lg flex-shrink-0 border border-[#E6D5C3]"
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ✕
+          </button>
+
+          {/* Image */}
+          <img
+            src={images[currentIndex]}
+            className="max-h-[90%] max-w-[90%] rounded-lg"
+          />
+
+          {/* Arrows */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={() =>
+                  setCurrentIndex((prev) =>
+                    prev === 0 ? images.length - 1 : prev - 1
+                  )
+                }
+                className="absolute left-5 text-white text-3xl"
+              >
+                ‹
+              </button>
+
+              <button
+                onClick={() =>
+                  setCurrentIndex((prev) => (prev + 1) % images.length)
+                }
+                className="absolute right-5 text-white text-3xl"
+              >
+                ›
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -330,6 +312,7 @@ ListingCard.defaultProps = {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 const PendingListings = () => {
+  
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null); // "approve-<id>" | "reject-<id>"

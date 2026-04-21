@@ -1,9 +1,7 @@
 import axios from 'axios';
 
 // API Base URL - uses env variable or falls back to localhost
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-  ? `${import.meta.env.VITE_API_BASE_URL}/api`
-  : 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Create axios instance
 const apiClient = axios.create({
@@ -72,10 +70,10 @@ export const userAPI = {
 // Properties (CRUD — admin-managed listings)
 export const propertiesAPI = {
   getAll: () =>
-    apiClient.get('/products/list'),
+    apiClient.get('/api/products/list'),
 
   getById: (id: string) =>
-    apiClient.get(`/products/single/${id}`),
+    apiClient.get(`/api/products/single/${id}`),
 };
 
 // User-submitted property listings (require auth)

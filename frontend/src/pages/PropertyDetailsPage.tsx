@@ -159,7 +159,7 @@ const PropertyDetailsPage: React.FC = () => {
       />
 
       {/* Hero Image */}
-      <PropertyHeroImage image={property.image?.[0]} />
+<PropertyHeroImage images={property.image} />
 
       {/* Property Header with Price & Specs */}
       <PropertyHeader

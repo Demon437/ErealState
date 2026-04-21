@@ -37,7 +37,7 @@ const PropertiesGrid: React.FC<PropertiesGridProps> = ({ properties, viewMode = 
   return (
     <div className="flex-1 p-8">
       {/* Properties Grid */}
-      <motion.div 
+      <motion.div
         variants={container}
         initial="hidden"
         whileInView="show"
@@ -50,23 +50,27 @@ const PropertiesGrid: React.FC<PropertiesGridProps> = ({ properties, viewMode = 
       >
         {properties.map((property, index) => (
           <motion.div key={property._id} variants={item}>
-            <PropertyCard
-              id={property._id}
-              image={property.image?.[0] || fallbackImages[index % fallbackImages.length]}
-              name={property.title}
-              price={formatPrice(property.price)}
-              location={property.location}
-              beds={property.beds}
-              baths={property.baths}
-              sqft={property.sqft}
-              badge={
-                property.availability === 'sold' ? 'SOLD' :
-                property.availability === 'rent' ? 'FOR RENT' :
-                property.availability === 'sale' ? 'FOR SALE' :
-                property.availability?.toUpperCase()
-              }
-              tags={property.type ? [property.type] : []}
-            />
+         <PropertyCard
+  id={property._id}
+  images={
+    property.image?.length > 0
+      ? property.image
+      : [fallbackImages[index % fallbackImages.length]]
+  }
+  name={property.title}
+  price={formatPrice(property.price)}
+  location={property.location}
+  beds={property.beds}
+  baths={property.baths}
+  sqft={property.sqft}
+  badge={
+    property.availability === 'sold' ? 'SOLD' :
+    property.availability === 'rent' ? 'FOR RENT' :
+    property.availability === 'sale' ? 'FOR SALE' :
+    property.availability?.toUpperCase()
+  }
+  tags={property.type ? [property.type] : []}
+/>
           </motion.div>
         ))}
       </motion.div>

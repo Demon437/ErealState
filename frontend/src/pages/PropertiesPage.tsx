@@ -23,7 +23,6 @@ export interface Property {
   amenities: string[];
   phone: string;
 }
-
 const PropertiesPage: React.FC = () => {
   useSEO({
     title: 'Properties - Browse Listings',
@@ -66,7 +65,7 @@ const PropertiesPage: React.FC = () => {
         setLoading(false);
       }
     };
-
+    
     fetchProperties();
   }, []);
 
