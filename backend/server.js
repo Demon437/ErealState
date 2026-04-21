@@ -78,8 +78,8 @@ app.use(helmet({
 app.use(compression());
 
 // Middleware — 500kb is plenty; 50mb was dangerously large
-app.use(express.json({ limit: '500kb' }));
-app.use(express.urlencoded({ extended: true, limit: '500kb' }));
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 
 // Request ID middleware for tracing (early in chain)
 app.use(requestIdMiddleware);
@@ -115,6 +115,8 @@ const envOrigins = [
 ].filter(Boolean);
 
 const defaultDevOrigins = [
+'https://adminrealestate.webixinfotech.in',
+'https://realestate.webixinfotech.in',
   'http://localhost:4000',
   'http://localhost:5173',
   'http://localhost:5174',
